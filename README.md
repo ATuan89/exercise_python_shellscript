@@ -2,7 +2,7 @@
 
 Generate and analyze CSV log files with multi-threading support.
 
-## � Flow Diagram
+## Flow Diagram
 
 ```mermaid
 flowchart LR
@@ -30,7 +30,7 @@ flowchart LR
     OPT --> RESULT
 ```
 
-## �📁 Structure
+## 📁 Structure
 
 ```
 python/
@@ -89,7 +89,7 @@ python myscript_optimized.py --from_datetime="2025-01-01 00:00:00" --to_datetime
 
 ---
 
-## � Terminal Output Examples
+## Terminal Output Examples
 
 ### Generate Logs Output
 
@@ -186,7 +186,7 @@ MEMORY & I/O
 
 ---
 
-## � Options Reference
+## Options Reference
 
 | Option | Description |
 |--------|-------------|
