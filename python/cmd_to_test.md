@@ -15,3 +15,7 @@ python myscript.py --from_datetime="2025-01-05 06:00:00" --to_datetime="2025-01-
 
 # (6) user + app filter
 python myscript.py --from_datetime="2025-01-05 06:00:00" --to_datetime="2025-03-16 15:00:00" --user=user1,user2,user99 --app=facebook --granularity=1day --dimensions=user
+
+
+# (7) user + app filter
+python myscript_optimized.py --from_datetime="2025-01-05 06:00:00" --to_datetime="2025-03-16 15:00:00" --user=user1,user2,user99 --app=facebook --granularity=1day --dimensions=user
