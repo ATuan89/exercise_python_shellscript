@@ -143,6 +143,61 @@ def calc_resource_diff(before, after):
         'io_write': after['io_write'] - before['io_write']
     }
 
+def get_cpu_info():
+    """Get detailed CPU information (Linux)."""
+    cpu_info = {
+        'cores': os.cpu_count() or 1,
+        'freq_mhz': None,
+        'model': None
+    }
+    
+    try:
+        with open('/proc/cpuinfo', 'r') as f:
+            for line in f:
+                if line.startswith('model name'):
+                    cpu_info['model'] = line.split(':')[1].strip()
+                elif line.startswith('cpu MHz'):
+                    cpu_info['freq_mhz'] = float(line.split(':')[1].strip())
+                    break
+    except (FileNotFoundError, PermissionError):
+        pass
+    
+    return cpu_info
+
+def get_cpu_times():
+    """Get CPU times from /proc/stat (Linux)."""
+    try:
+        with open('/proc/stat', 'r') as f:
+            line = f.readline()
+            parts = line.split()
+            return {
+                'user': int(parts[1]),
+                'nice': int(parts[2]),
+                'system': int(parts[3]),
+                'idle': int(parts[4]),
+                'iowait': int(parts[5]) if len(parts) > 5 else 0,
+            }
+    except (FileNotFoundError, PermissionError):
+        return None
+
+def calc_cpu_percent(before, after):
+    """Calculate CPU usage percentage."""
+    if not before or not after:
+        return None
+    
+    total_before = sum(before.values())
+    total_after = sum(after.values())
+    idle_before = before['idle'] + before.get('iowait', 0)
+    idle_after = after['idle'] + after.get('iowait', 0)
+    
+    total_diff = total_after - total_before
+    idle_diff = idle_after - idle_before
+    
+    if total_diff == 0:
+        return 0.0
+    
+    return ((total_diff - idle_diff) / total_diff) * 100
+
 def get_next_output_filename(base_name):
     """
     Get the next available output filename.
@@ -301,19 +356,33 @@ def main():
     # Performance summary
     total_time = time.perf_counter() - start_time
     final_resources = get_resource_usage()
+    cpu_info = get_cpu_info()
     
     print(f"\n{'='*70}")
     print("PERFORMANCE METRICS")
     print(f"{'='*70}")
-    print(f"{'Phase':<30} {'Time':>10} {'CPU User':>10} {'CPU Sys':>10} {'IO R':>6} {'IO W':>6}")
+    print(f"{'Phase':<30} {'Time':>12} {'Rows/sec':>15}")
     print(f"{'-'*70}")
-    print(f"{'Data reading & aggregation':<30} {read_time:>9.4f}s {read_resources['cpu_user']:>9.4f}s {read_resources['cpu_sys']:>9.4f}s {read_resources['io_read']:>6} {read_resources['io_write']:>6}")
+    rows_per_sec = len(aggregated) / read_time if read_time > 0 else 0
+    print(f"{'Data reading & aggregation':<30} {read_time:>11.4f}s")
     if write_resources:
-        print(f"{'Writing results':<30} {write_time:>9.4f}s {write_resources['cpu_user']:>9.4f}s {write_resources['cpu_sys']:>9.4f}s {write_resources['io_read']:>6} {write_resources['io_write']:>6}")
+        print(f"{'Writing results':<30} {write_time:>11.4f}s")
     print(f"{'-'*70}")
-    print(f"{'TOTAL':<30} {total_time:>9.4f}s")
+    print(f"{'TOTAL':<30} {total_time:>11.4f}s")
     print(f"{'='*70}")
-    print(f"Peak Memory Usage: {final_resources['max_rss'] / 1024:.2f} MB")
+    print()
+    print("CPU METRICS")
+    print(f"{'-'*70}")
+    print(f"  CPU Model:           {cpu_info.get('model', 'Unknown')}")
+    print(f"  CPU Cores:           {cpu_info['cores']}")
+    if cpu_info.get('freq_mhz'):
+        print(f"  CPU Frequency:       {cpu_info['freq_mhz']:.0f} MHz ({cpu_info['freq_mhz']/1000:.2f} GHz)")
+    print()
+    print("MEMORY & I/O")
+    print(f"{'-'*70}")
+    print(f"  Peak Memory:         {final_resources['max_rss'] / 1024:.2f} MB")
+    print(f"  I/O Read Ops:        {read_resources['io_read']}")
+    print(f"  I/O Write Ops:       {read_resources['io_write'] + (write_resources['io_write'] if write_resources else 0)}")
     print(f"{'='*70}")
 
 if __name__ == '__main__':
