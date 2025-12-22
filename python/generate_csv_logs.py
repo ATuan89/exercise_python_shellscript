@@ -134,7 +134,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     
-    parser.add_argument('--days', type=int, default=30,
+    parser.add_argument('--days', type=int, default=90,
                         help='Number of days to generate (default: 30)')
     parser.add_argument('--logs-per-day', type=int, default=50000,
                         help='Number of logs per day (default: 50000)')
@@ -221,6 +221,11 @@ def main():
     # Calculate throughput
     logs_per_second = total_logs_generated / overall_time if overall_time > 0 else 0
     
+    # Calculate averages
+    avg_time_per_day = overall_time / args.days if args.days > 0 else 0
+    avg_gen_time_per_day = gen_time_total / args.days if args.days > 0 else 0
+    avg_write_time_per_day = write_time_total / args.days if args.days > 0 else 0
+    
     # Print performance summary
     print()
     print("=" * 70)
@@ -233,13 +238,19 @@ def main():
     print("=" * 70)
     print("PERFORMANCE METRICS")
     print("=" * 70)
-    print(f"{'Phase':<25} {'Time':>15} {'Throughput':>20}")
+    print(f"{'Phase':<25} {'Time Total':>15} {'Time Avg/Day':>15} {'Throughput':>12}")
     print("-" * 70)
-    print(f"{'Log generation':<25} {format_time(gen_time_total):>15} {total_logs_generated/gen_time_total:>15,.0f} logs/s")
-    print(f"{'File writing':<25} {format_time(write_time_total):>15} {total_logs_generated/write_time_total:>15,.0f} logs/s")
+    print(f"{'Log generation':<25} {format_time(gen_time_total):>15} {format_time(avg_gen_time_per_day):>15} {total_logs_generated/gen_time_total:>9,.0f} l/s")
+    print(f"{'File writing':<25} {format_time(write_time_total):>15} {format_time(avg_write_time_per_day):>15} {total_logs_generated/write_time_total:>9,.0f} l/s")
     print("-" * 70)
-    print(f"{'TOTAL':<25} {format_time(overall_time):>15} {logs_per_second:>15,.0f} logs/s")
+    print(f"{'TOTAL':<25} {format_time(overall_time):>15} {format_time(avg_time_per_day):>15} {logs_per_second:>9,.0f} l/s")
     print("=" * 70)
+    print()
+    print("TIME SUMMARY")
+    print("-" * 70)
+    print(f"  Total Time:          {format_time(overall_time)}")
+    print(f"  Avg Time per Day:    {format_time(avg_time_per_day)}")
+    print(f"  Avg Time per Log:    {overall_time / total_logs_generated * 1000:.4f} ms")
     print()
     print("RESOURCE USAGE")
     print("-" * 70)
