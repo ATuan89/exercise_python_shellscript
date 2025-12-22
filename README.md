@@ -2,7 +2,35 @@
 
 Generate and analyze CSV log files with multi-threading support.
 
-## 📁 Structure
+## � Flow Diagram
+
+```mermaid
+flowchart LR
+    subgraph Generate["1️⃣ Generate"]
+        GEN[generate_csv_logs.py]
+    end
+    
+    subgraph Storage["2️⃣ Storage"]
+        CSV[(csv_logs/)]
+    end
+    
+    subgraph Query["3️⃣ Query"]
+        BASIC[myscript.py]
+        OPT[myscript_optimized.py]
+    end
+    
+    subgraph Output["4️⃣ Output"]
+        RESULT[(results/)]
+    end
+    
+    GEN -->|"Multi-thread"| CSV
+    CSV --> BASIC
+    CSV -->|"Parallel"| OPT
+    BASIC --> RESULT
+    OPT --> RESULT
+```
+
+## �📁 Structure
 
 ```
 python/
