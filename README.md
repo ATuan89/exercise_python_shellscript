@@ -1,322 +1,115 @@
 # Python Log Aggregation Pipeline
 
-A high-performance log aggregation system that generates, processes, and analyzes CSV log files with multi-threading support.
+Generate and analyze CSV log files with multi-threading support.
 
-## 📊 Architecture Overview
-
-```mermaid
-flowchart TB
-    subgraph Generation["📝 Log Generation"]
-        GEN[generate_csv_logs.py]
-        GEN --> |"Multi-threaded"| CSV1[2025-01-01.log.csv]
-        GEN --> CSV2[2025-01-02.log.csv]
-        GEN --> CSV3[...]
-        GEN --> CSVN[2025-03-31.log.csv]
-    end
-    
-    subgraph Storage["💾 CSV Storage"]
-        CSV1 --> LOGS[(csv_logs/)]
-        CSV2 --> LOGS
-        CSV3 --> LOGS
-        CSVN --> LOGS
-    end
-    
-    subgraph Processing["⚡ Query Processing"]
-        LOGS --> |"Single-threaded"| BASIC[myscript.py]
-        LOGS --> |"Multi-threaded"| OPT[myscript_optimized.py]
-    end
-    
-    subgraph Output["📈 Results"]
-        BASIC --> RESULT[(results/)]
-        OPT --> RESULT
-    end
-```
-
-## 📁 Project Structure
+## 📁 Structure
 
 ```
 python/
-├── generate_csv_logs.py    # Generate sample CSV log files
-├── myscript.py             # Basic log aggregation (single-threaded)
-├── myscript_optimized.py   # Optimized aggregation (multi-threaded)
-├── csv_logs/               # Generated log files
-│   ├── 2025-01-01.log.csv
-│   ├── 2025-01-02.log.csv
-│   └── ...
-├── results/                # Query output files
-│   ├── result.csv
-│   ├── result_1.csv
-│   └── ...
-└── README.md
+├── generate_csv_logs.py    # Generate sample logs
+├── myscript.py             # Basic query (single-thread)
+├── myscript_optimized.py   # Fast query (multi-thread)
+├── csv_logs/               # Log files
+└── results/                # Query results
 ```
 
-## 🔧 Components
-
-### 1. Log Generator (`generate_csv_logs.py`)
-
-Generates sample CSV log files with configurable parameters.
-
-```mermaid
-flowchart LR
-    subgraph Input["Configuration"]
-        DAYS[--days]
-        LOGS[--logs-per-day]
-        THREADS[--threads]
-        BATCH[--batch-size]
-    end
-    
-    subgraph Processing["Multi-threaded Generation"]
-        T1[Thread 1]
-        T2[Thread 2]
-        T3[Thread 3]
-        T4[Thread N]
-    end
-    
-    subgraph Output["Output"]
-        FILE[CSV Files]
-        METRICS[Performance Metrics]
-    end
-    
-    Input --> Processing
-    Processing --> Output
-```
-
-#### Usage
+## � How to Run
 
 ```bash
-# Default: 90 days, 50k logs/day, 4 threads
-python generate_csv_logs.py
-
-# Custom configuration
-python generate_csv_logs.py --days=30 --logs-per-day=100000 --threads=8
-
-# Full options
-python generate_csv_logs.py \
-    --days=90 \
-    --logs-per-day=50000 \
-    --threads=4 \
-    --batch-size=10000 \
-    --start-date=2025-01-01 \
-    --output-dir=./csv_logs
+cd python/
 ```
 
-#### Options
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--days` | Number of days to generate | 90 |
-| `--logs-per-day` | Logs per day | 50,000 |
-| `--threads` | Worker threads | 4 |
-| `--batch-size` | Logs per batch | 10,000 |
-| `--start-date` | Start date (YYYY-MM-DD) | 2025-01-01 |
-| `--output-dir` | Output directory | ./csv_logs |
-
----
-
-### 2. Basic Aggregator (`myscript.py`)
-
-Single-threaded log aggregation for smaller datasets.
-
-```mermaid
-flowchart TD
-    subgraph Input["Query Parameters"]
-        FROM[--from_datetime]
-        TO[--to_datetime]
-        GRAN[--granularity]
-        DIM[--dimensions]
-        USER[--user filter]
-        APP[--app filter]
-    end
-    
-    subgraph Process["Sequential Processing"]
-        READ["Read CSV Files"]
-        FILTER["Filter by datetime/user/app"]
-        AGG["Aggregate by period"]
-        SORT["Sort results"]
-    end
-    
-    subgraph Output["Output"]
-        CSV["result.csv"]
-        PERF["Performance Metrics"]
-    end
-    
-    Input --> READ
-    READ --> FILTER
-    FILTER --> AGG
-    AGG --> SORT
-    SORT --> Output
-```
-
-#### Usage
+### 1. Generate Logs
 
 ```bash
-# Basic query
-python myscript.py \
-    --from_datetime="2025-01-01 00:00:00" \
-    --to_datetime="2025-01-31 23:59:59" \
-    --granularity=1day \
-    --dimensions=user
-
-# With filters
-python myscript.py \
-    --from_datetime="2025-01-01 00:00:00" \
-    --to_datetime="2025-01-31 23:59:59" \
-    --granularity=30m \
-    --dimensions=user,app \
-    --user=user1,user2 \
-    --app=facebook,twitter
+python generate_csv_logs.py --days=90 --logs-per-day=50000 --threads=4
 ```
 
----
-
-### 3. Optimized Aggregator (`myscript_optimized.py`)
-
-Multi-threaded aggregation for **millions of records**.
-
-```mermaid
-flowchart TD
-    subgraph Input["Query Parameters"]
-        PARAMS["from/to datetime, granularity, dimensions, filters"]
-        THREADS["--threads (default: 4)"]
-    end
-    
-    subgraph Parallel["Parallel File Processing"]
-        direction LR
-        F1["File 1"] --> T1["Thread 1"]
-        F2["File 2"] --> T2["Thread 2"]
-        F3["File 3"] --> T3["Thread 3"]
-        FN["File N"] --> TN["Thread N"]
-    end
-    
-    subgraph Merge["Result Merging"]
-        T1 --> COMBINE["Combine Results"]
-        T2 --> COMBINE
-        T3 --> COMBINE
-        TN --> COMBINE
-    end
-    
-    subgraph Output["Output"]
-        COMBINE --> CSV["result.csv"]
-        COMBINE --> METRICS["Detailed Metrics"]
-    end
-    
-    Input --> Parallel
-    Parallel --> Merge
-```
-
-#### Usage
+### 2. Query Logs
 
 ```bash
-# Query with 4 threads (default)
-python myscript_optimized.py \
-    --from_datetime="2025-01-01 00:00:00" \
-    --to_datetime="2025-03-31 23:59:59" \
-    --granularity=1day \
-    --dimensions=user
+# Basic
+python myscript.py --from_datetime="2025-01-01 00:00:00" --to_datetime="2025-01-31 23:59:59" --granularity=1day --dimensions=user
 
-# Query with 8 threads for maximum performance
-python myscript_optimized.py \
-    --from_datetime="2025-01-01 00:00:00" \
-    --to_datetime="2025-03-31 23:59:59" \
-    --granularity=30m \
-    --dimensions=user,app \
-    --threads=8
+# Optimized (faster)
+python myscript_optimized.py --from_datetime="2025-01-01 00:00:00" --to_datetime="2025-03-31 23:59:59" --granularity=1day --dimensions=user --threads=4
 ```
 
 ---
 
-## 📋 CSV Log Format
+## 📋 Test Commands
 
-Each log file contains the following columns:
+```bash
+# (1) dimensions: user,app
+python myscript.py --from_datetime="2025-01-01 00:00:00" --to_datetime="2025-01-08 12:30:00" --user=user2 --granularity=30m --dimensions=user,app
 
-| Column | Description | Example |
-|--------|-------------|---------|
-| timestamp | Log timestamp | 2025-01-01 14:30:45 |
-| user | User identifier | user42 |
-| app | Application name | facebook |
-| metric_1 - metric_9 | Numeric metrics | 123, 456, ... |
+# (2) dimensions: user
+python myscript.py --from_datetime="2025-01-01 00:00:00" --to_datetime="2025-01-08 12:30:00" --user=user2 --granularity=30m --dimensions=user
 
-### Sample Data
+# (3) dimensions: app
+python myscript.py --from_datetime="2025-01-01 00:00:00" --to_datetime="2025-01-08 12:30:00" --user=user2 --granularity=30m --dimensions=app
 
-```csv
-2025-01-01 00:15:23,user42,facebook,234,567,123,890,456,789,321,654,987
-2025-01-01 00:22:45,user17,twitter,345,678,234,901,567,890,432,765,098
+# (4) multiple users
+python myscript.py --from_datetime="2025-01-01 00:00:00" --to_datetime="2025-01-31 23:59:59" --user=user1,user2 --granularity=1day --dimensions=user
+
+# (5) user + app filter
+python myscript.py --from_datetime="2025-01-01 00:00:00" --to_datetime="2025-03-31 23:59:59" --user=user1,user2,user99 --app=facebook --granularity=1day --dimensions=user
+
+# (6) optimized version
+python myscript_optimized.py --from_datetime="2025-01-01 00:00:00" --to_datetime="2025-03-31 23:59:59" --user=user1,user2,user99 --app=facebook --granularity=1day --dimensions=user --threads=8
 ```
 
 ---
 
-## ⚡ Performance Comparison
+## � Terminal Output Examples
 
-| Metric | myscript.py | myscript_optimized.py |
-|--------|-------------|----------------------|
-| Processing | Single-threaded | Multi-threaded |
-| Best for | < 100K records | Millions of records |
-| Speed (90 days, 50K/day) | ~12s | ~5s |
-| Memory | ~12 MB | ~14 MB |
-| CPU Utilization | ~100% (1 core) | ~15-30% (distributed) |
+### Generate Logs Output
 
----
+```
+======================================================================
+CSV LOG GENERATOR - Configuration
+======================================================================
+  Days to generate:    5
+  Logs per day:        20,000
+  Total logs:          100,000
+  Worker threads:      4
+======================================================================
 
-## 📊 Data Flow Diagram
+Generating logs...
+Progress: [████████████████████████████████████████] 100.0% (5/5) ETA: 0.00s
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Generator as generate_csv_logs.py
-    participant Storage as csv_logs/
-    participant Query as myscript*.py
-    participant Results as results/
+======================================================================
+GENERATION COMPLETE
+======================================================================
+  Total files created: 5
+  Total logs:          100,000
 
-    User->>Generator: Configure (days, logs, threads)
-    Generator->>Generator: Multi-threaded generation
-    Generator->>Storage: Save daily CSV files
-    Generator->>User: Performance metrics
-    
-    User->>Query: Query parameters
-    Query->>Storage: Read relevant files
-    Query->>Query: Filter & Aggregate
-    Query->>Results: Save aggregated CSV
-    Query->>User: Performance metrics
+======================================================================
+PERFORMANCE METRICS
+======================================================================
+Phase                          Time Total    Time Avg/Day   Throughput
+----------------------------------------------------------------------
+Log generation                      1.10s           0.22s    91,004 l/s
+File writing                        0.31s           0.06s   323,046 l/s
+----------------------------------------------------------------------
+TOTAL                               1.41s           0.28s    70,978 l/s
+======================================================================
+
+CPU METRICS
+----------------------------------------------------------------------
+  CPU Model:           Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz
+  CPU Cores:           8 (using 4 threads)
+  CPU Frequency:       2897 MHz (2.90 GHz)
+  CPU Efficiency:      99.1%
+
+MEMORY & I/O
+----------------------------------------------------------------------
+  Peak Memory:         31.97 MB
+  I/O Write Ops:       14000
+======================================================================
 ```
 
----
-
-## 🎯 Aggregation Logic
-
-```mermaid
-flowchart TD
-    subgraph Granularity["Time Granularity"]
-        G30["30m: Round to 30-min intervals"]
-        G1D["1day: Round to day start"]
-    end
-    
-    subgraph Dimensions["Group By Dimensions"]
-        DU["user: Group by user"]
-        DA["app: Group by app"]
-        DUA["user,app: Group by both"]
-    end
-    
-    subgraph Aggregation["Metric Aggregation"]
-        SUM["SUM(metric_1...metric_9)"]
-    end
-    
-    Granularity --> Dimensions
-    Dimensions --> Aggregation
-```
-
-### Examples
-
-| Query | Groups By | Result |
-|-------|-----------|--------|
-| `--granularity=30m --dimensions=user` | 30-min period + user | Sum of metrics per user per 30 mins |
-| `--granularity=1day --dimensions=app` | Day + app | Sum of metrics per app per day |
-| `--granularity=1day --dimensions=user,app` | Day + user + app | Sum per user-app pair per day |
-
----
-
-## 🔍 Performance Metrics
-
-Both query scripts display detailed performance metrics:
+### Query Output (myscript_optimized.py)
 
 ```
 ======================================================================
@@ -328,6 +121,18 @@ SYSTEM INFORMATION
   Total Memory:   11.6 GB
 ======================================================================
 
+Query: 2025-01-01 00:00:00 to 2025-03-31 23:59:59
+Granularity: 1day | Dimensions: ['user']
+Threads: 4
+User filter: ['user1', 'user2', 'user99']
+App filter: ['facebook']
+
+Processing files...
+Processed 71 files, 13,323 rows matched
+Found 213 aggregated entries
+Results saved to: results/result.csv
+
+======================================================================
 PERFORMANCE METRICS
 ======================================================================
 Phase                                  Time        Rows/sec
@@ -343,42 +148,24 @@ CPU METRICS
   CPU Cores Used:      4 / 8 available
   CPU Frequency:       3400 MHz
   CPU Usage (read):    15.3%
-  CPU Usage (total):   15.3%
 
 MEMORY & I/O
 ----------------------------------------------------------------------
   Peak Memory:         14.00 MB
-  I/O Read Ops:        0
   I/O Write Ops:       40
 ======================================================================
 ```
 
 ---
 
-## 🚀 Quick Start
+## � Options Reference
 
-```bash
-# 1. Generate sample logs (5 days, 50K logs each)
-python generate_csv_logs.py --days=5 --logs-per-day=50000
-
-# 2. Query with basic script
-python myscript.py \
-    --from_datetime="2025-01-01 00:00:00" \
-    --to_datetime="2025-01-05 23:59:59" \
-    --granularity=1day \
-    --dimensions=user
-
-# 3. Query with optimized script (for large datasets)
-python myscript_optimized.py \
-    --from_datetime="2025-01-01 00:00:00" \
-    --to_datetime="2025-01-05 23:59:59" \
-    --granularity=1day \
-    --dimensions=user \
-    --threads=4
-```
-
----
-
-## 📝 License
-
-This project is for educational purposes - Data Pipelines Exercise.
+| Option | Description |
+|--------|-------------|
+| `--from_datetime` | Start datetime (YYYY-MM-DD HH:MM:SS) |
+| `--to_datetime` | End datetime |
+| `--granularity` | `30m` or `1day` |
+| `--dimensions` | `user`, `app`, or `user,app` |
+| `--user` | Filter by users (comma-separated) |
+| `--app` | Filter by apps (comma-separated) |
+| `--threads` | Worker threads (optimized only) |
