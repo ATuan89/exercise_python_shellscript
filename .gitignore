@@ -210,4 +210,6 @@ __marimo__/
 # My gitignore
 results/
 csv_logs/
+sample_data/
+output/
 
