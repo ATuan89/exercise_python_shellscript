@@ -12,17 +12,16 @@ TARGET_APP="$2"
 DATA_DIR="shell_script/test_data/ex3"
 if [ ! -d "$DATA_DIR" ]; then DATA_DIR="."; fi
 
-RESULTS_DIR="shell_script/results"
-mkdir -p "$RESULTS_DIR"
-OUTPUT_FILE="$RESULTS_DIR/exercise3_users.txt"
-
+# Temp files
 CANDIDATES=$(mktemp)
 CURRENT_DAY_USERS=$(mktemp)
 TEMP_INTERSECTION=$(mktemp)
 
 trap "rm -f $CANDIDATES $CURRENT_DAY_USERS $TEMP_INTERSECTION" EXIT
 
+# Find relevant files
 FILES=$(find "$DATA_DIR" -maxdepth 1 -name "user.application.*.csv" | sort)
+
 FIRST_FILE=true
 
 for file in $FILES; do
@@ -43,13 +42,14 @@ for file in $FILES; do
     fi
 done
 
-{
-    echo "Users using $TARGET_APP every day up to $TARGET_DATE:"
-    if [ -s "$CANDIDATES" ]; then
-        cat "$CANDIDATES"
-    else
-        echo "No users found."
-    fi
-} | tee "$OUTPUT_FILE"
+if [ "$FIRST_FILE" = true ]; then
+    echo "No files found for date <= $TARGET_DATE"
+    exit 1
+fi
 
-echo "Results saved to $OUTPUT_FILE"
+echo "Users using $TARGET_APP every day up to $TARGET_DATE:"
+if [ -s "$CANDIDATES" ]; then
+    cat "$CANDIDATES"
+else
+    echo "No users found."
+fi

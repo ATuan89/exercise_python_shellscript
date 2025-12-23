@@ -10,12 +10,9 @@ if [ -z "$1" ]; then
 fi
 
 SEARCH_PATH="$1"
-RESULTS_DIR="shell_script/results"
-mkdir -p "$RESULTS_DIR"
-OUTPUT_FILE="$RESULTS_DIR/exercise1_result.txt"
 
-echo "Scanning $SEARCH_PATH..." | tee "$OUTPUT_FILE"
-echo "-----------------------------------" | tee -a "$OUTPUT_FILE"
+echo "Scanning $SEARCH_PATH..."
+echo "-----------------------------------"
 
 # Find all .git directories
 find "$SEARCH_PATH" -name ".git" -type d 2>/dev/null | while read git_dir; do
@@ -29,13 +26,9 @@ find "$SEARCH_PATH" -name ".git" -type d 2>/dev/null | while read git_dir; do
     duration_ms=$(( (end_time - start_time) / 1000000 ))
     
     if [ "$size_mb" -gt 1024 ]; then
-        {
-            echo "Found: $repo_dir"
-            echo "Size: $size_mb MB"
-            echo "Time taken: ${duration_ms} ms"
-            echo "-----------------------------------"
-        } | tee -a "$OUTPUT_FILE"
+        echo "Found: $repo_dir"
+        echo "Size: $size_mb MB"
+        echo "Time taken: ${duration_ms} ms"
+        echo "-----------------------------------"
     fi
 done
-
-echo "Results saved to $OUTPUT_FILE"

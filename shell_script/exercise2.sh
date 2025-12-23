@@ -16,7 +16,7 @@ DATE="$1"
 DATA_DIR="shell_script/test_data/ex2"
 if [ ! -d "$DATA_DIR" ]; then DATA_DIR="."; fi
 
-RESULTS_DIR="shell_script/results"
+RESULTS_DIR="shell_script/results/"
 mkdir -p "$RESULTS_DIR"
 
 # Temp files

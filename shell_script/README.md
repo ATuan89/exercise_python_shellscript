@@ -35,9 +35,9 @@ flowchart TD
     TEST_DATA --> S2
     TEST_DATA --> S3
     
-    S1 --> RES
+    S1 --> |stdout| Terminal
     S2 --> RES
-    S3 --> RES
+    S3 --> |stdout| Terminal
 ```
 
 ## 📁 Structure
@@ -49,7 +49,7 @@ shell_script/
 ├── exercise2.sh                   # CSV Join/Aggregation
 ├── exercise3.sh                   # User daily streak check
 ├── test_data/                     # Generated mock data
-└── results/                       # All outputs saved here
+└── results/                       # Outputs for Exercise 2
 ```
 
 ## 🚀 How to Run
@@ -92,7 +92,6 @@ Found: shell_script/test_data/ex1/repo2
 Size: 1101 MB
 Time taken: 4 ms
 -----------------------------------
-Results saved to shell_script/results/exercise1_result.txt
 ```
 
 ### Exercise 2 Output
@@ -108,5 +107,4 @@ Created shell_script/results/apps_devices.csv
 Users using app1 every day up to 2020-01-22:
 user1
 user2
-Results saved to shell_script/results/exercise3_users.txt
 ```
