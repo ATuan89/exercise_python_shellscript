@@ -1,14 +1,3 @@
-#!/bin/bash
-#
-# Exercise 2: CSV Aggregation (User-Application-Device)
-# Aggregates 48 CSV files per day (30-min intervals)
-#
-# Usage: ./exercise2.sh YYYY-MM-DD
-#
-# Output:
-#   - app_users.csv: application,unique_users
-#   - device_users.csv: device,unique_users
-#   - app_device_combinations.csv: application,device
 
 set -e
 

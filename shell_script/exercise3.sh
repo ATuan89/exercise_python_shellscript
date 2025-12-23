@@ -1,9 +1,3 @@
-#!/bin/bash
-#
-# Exercise 3: Consecutive Days User Tracking
-# Finds users who used an app every day up to a given date
-#
-# Usage: ./exercise3.sh YYYY-MM-DD <application>
 
 set -e
 

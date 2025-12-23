@@ -1,9 +1,3 @@
-#!/bin/bash
-#
-# Exercise 1: Directory Size Checker
-# Finds directories containing .git that are larger than 1GB
-#
-# Usage: ./exercise1.sh <path>
 
 set -e
 
